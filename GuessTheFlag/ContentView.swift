@@ -14,15 +14,21 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     
     @State private var showingScore = false
+    @State private var showingReset = false
+    @State private var resetScores = false
+    
     @State private var scoreTitle = ""
+    @State private var messageText = ""
+    @State private var correctScore = 0
+    @State private var incorrectScore = 0
     
     var body: some View {
         ZStack {
-            RadialGradient(stops: [
-                .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
-                .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3),
-            ], center: .top, startRadius: 200, endRadius: 400)
-                .ignoresSafeArea()
+            LinearGradient(gradient: Gradient(
+                colors: [Color(red: 0.1, green: 0.2, blue: 0.45),
+                          Color(red: 0.76, green: 0.15, blue: 0.26)]),
+                    startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea()
             
             VStack {
                 Spacer()
@@ -47,7 +53,6 @@ struct ContentView: View {
                         } label: {
                             Image(countries[number])
                                 .renderingMode(.original)
-                            //.clipShape(Capsule())
                                 .shadow(radius: 5)
                         }
                     }
@@ -59,7 +64,9 @@ struct ContentView: View {
                 
                 Spacer()
                 Spacer()
-                Text("Score: ???")
+                Text("Guess \(correctScore+incorrectScore)/8")
+                    .foregroundColor(.white)
+                Text("Score: \(correctScore)")
                     .foregroundColor(.white)
                     .font(.title.bold())
                 Spacer()
@@ -69,7 +76,12 @@ struct ContentView: View {
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: askQuestion)
         } message: {
-            Text("Your score is ???")
+            Text(messageText+"Your score is \(correctScore)")
+        }
+        .alert(scoreTitle, isPresented: $showingReset) {
+            Button("Restart", action: askQuestion)
+        } message: {
+            Text(messageText+"Your score was \(correctScore) out of 8")
         }
 
     }
@@ -77,14 +89,30 @@ struct ContentView: View {
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct"
+            messageText = ""
+            correctScore += 1
         } else {
             scoreTitle = "Wrong"
+            messageText = "That was \(countries[number]) \n"
+            incorrectScore += 1
         }
-
-        showingScore = true
+        
+        if correctScore+incorrectScore == 8 {
+            // game over
+            resetScores = true
+            showingReset = true
+        }
+        else {
+            showingScore = true
+        }
     }
     
     func askQuestion() {
+        if resetScores {
+            correctScore = 0
+            incorrectScore = 0
+            resetScores.toggle()
+        }
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
