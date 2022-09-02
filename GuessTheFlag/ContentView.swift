@@ -51,9 +51,7 @@ struct ContentView: View {
                             // flag was tapped
                             flagTapped(number)
                         } label: {
-                            Image(countries[number])
-                                .renderingMode(.original)
-                                .shadow(radius: 5)
+                            FlagView(flagOf: countries[number])
                         }
                     }
                 }
@@ -83,7 +81,6 @@ struct ContentView: View {
         } message: {
             Text(messageText+"Your score was \(correctScore) out of 8")
         }
-
     }
     
     func flagTapped(_ number: Int) {
@@ -116,6 +113,18 @@ struct ContentView: View {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
+    
+    struct FlagView: View {
+        var flagOf: String
+        
+        var body: some View {
+            Image(flagOf)
+                .renderingMode(.original)
+                .shadow(radius: 5)
+        }
+        
+    }
+    
 }
 
 
