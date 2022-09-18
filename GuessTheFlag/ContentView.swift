@@ -22,6 +22,10 @@ struct ContentView: View {
     @State private var correctScore = 0
     @State private var incorrectScore = 0
     
+    @State private var flagSpinAmount = [0.0, 0.0, 0.0]
+    @State private var flagOpacity = [1.0, 1.0, 1.0]
+    @State private var flagScale = [1.0, 1.0, 1.0]
+
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(
@@ -53,7 +57,13 @@ struct ContentView: View {
                         } label: {
                             FlagView(flagOf: countries[number])
                         }
+                        .rotation3DEffect(.degrees(flagSpinAmount[number]),
+                                          axis: (x: 0, y: 1, z: 0))
+                        .opacity(flagOpacity[number])
+                        .scaleEffect(flagScale[number])
+                        .animation(.default, value: flagSpinAmount)
                     }
+                    
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -83,6 +93,7 @@ struct ContentView: View {
         }
     }
     
+    
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct"
@@ -102,7 +113,15 @@ struct ContentView: View {
         else {
             showingScore = true
         }
+        
+        // animation work
+        flagSpinAmount[number] += 360
+        flagOpacity = [0.25, 0.25, 0.25]
+        flagOpacity[number] = 1.0
+        flagScale = [0.5, 0.5, 0.5]
+        flagScale[number] = 1.0
     }
+    
     
     func askQuestion() {
         if resetScores {
@@ -110,9 +129,14 @@ struct ContentView: View {
             incorrectScore = 0
             resetScores.toggle()
         }
+        flagScale = [1.0, 1.0, 1.0]
+        withAnimation{
+            flagOpacity = [1.0, 1.0, 1.0]
+        }
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
+    
     
     struct FlagView: View {
         var flagOf: String
@@ -122,7 +146,6 @@ struct ContentView: View {
                 .renderingMode(.original)
                 .shadow(radius: 5)
         }
-        
     }
     
 }
